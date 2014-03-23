@@ -1,0 +1,1 @@
+daemontools_ssh_host: "{{ ansible_eth1.ipv4.address if ansible_product_name == 'VirtualBox' else ansible_eth0.ipv4.address }}"

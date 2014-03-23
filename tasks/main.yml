@@ -1,0 +1,26 @@
+- name: update apt cache
+  apt: update_cache=yes
+  sudo: yes
+
+- name: install daemontools
+  apt: pkg={{ item }} state=present
+  with_items:
+    - daemontools
+    - daemontools-run
+  sudo: yes
+  register: daemontools_installed
+
+- name: reboot if daemontools newly installed
+  command: /sbin/reboot
+  async: 0
+  poll: 0
+  sudo: yes
+  when: daemontools_installed|changed
+
+- name: wait shutting down
+  local_action: wait_for host={{ daemontools_ssh_host }} port=22 state=stopped
+  when: daemontools_installed|changed
+
+- name: wait reboot
+  local_action: wait_for host={{ daemontools_ssh_host }} port=22 state=started
+  when: daemontools_installed|changed
